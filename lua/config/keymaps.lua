@@ -15,7 +15,7 @@ vim.keymap.set("n", "<C-Right>", "<C-w>l")
 vim.keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save file" })
 vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>i", { desc = "Save file" })
 
--- Neotree
+-- Neo-tree toggle
 vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle Neo-tree" })
 
 -- Форматирование вручную
@@ -58,11 +58,31 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to down window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to up window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
--- Переключение между вкладками (tabpages)
-vim.keymap.set("n", "<Tab>", ":tabnext<CR>", { desc = "Next tabpage" })
-vim.keymap.set("n", "<S-Tab>", ":tabprevious<CR>", { desc = "Previous tabpage" })
-vim.keymap.set("n", "t", ":tabnew<CR>", { desc = "New tabpage" })
-vim.keymap.set("n", "<leader>x", ":tabclose<CR>", { desc = "Close current tabpage" })
+-- Переключение между буферами
+vim.keymap.set("n", "<Tab>", ":bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<S-Tab>", ":bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>b", ":enew<CR>", { desc = "New buffer" })
+vim.keymap.set("n", "<C-n>", ":tabnew<CR>", { desc = "New tabpage" })
+
+-- Функция для правильного закрытия буферов
+local function close_buffer()
+  local buf_count = 0
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
+      buf_count = buf_count + 1
+    end
+  end
+  
+  if buf_count > 1 then
+    vim.cmd("bprevious")
+    vim.cmd("bdelete #")
+  else
+    vim.cmd("enew")
+    vim.cmd("bdelete #")
+  end
+end
+
+vim.keymap.set("n", "<leader>x", close_buffer, { desc = "Close current buffer" })
 
 -- Diagnostic keymaps
 vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostic message" })

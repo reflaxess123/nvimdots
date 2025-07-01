@@ -1,4 +1,5 @@
 vim.opt.laststatus = 3
+vim.opt.showtabline = 2
 vim.opt.number = true
 vim.opt.relativenumber = false
 
@@ -11,6 +12,8 @@ vim.opt.smartindent = true
 
 -- Убираем символы ~ в пустых строках
 vim.opt.fillchars = { eob = " " }
+
+
 
 -- Прозрачность
 vim.cmd([[
@@ -57,9 +60,9 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       highlight GitSignsAdd guifg=#9ece6a ctermfg=107
       highlight GitSignsChange guifg=#e0af68 ctermfg=179
       highlight GitSignsDelete guifg=#f7768e ctermfg=203
-      highlight GitSignsAddLn guibg=#2a3441 ctermbg=238
-      highlight GitSignsChangeLn guibg=#3a3441 ctermbg=238
-      highlight GitSignsDeleteLn guibg=#3a2441 ctermbg=238
+      highlight GitSignsAddLn guibg=NONE ctermbg=NONE
+      highlight GitSignsChangeLn guibg=NONE ctermbg=NONE
+      highlight GitSignsDeleteLn guibg=NONE ctermbg=NONE
     ]])
   end,
 })
@@ -76,6 +79,30 @@ vim.api.nvim_create_autocmd("User", {
       highlight lualine_y_normal guibg=NONE ctermbg=NONE
       highlight lualine_z_normal guibg=NONE ctermbg=NONE
     ]])
+  end,
+})
+
+-- Автокоманда для предотвращения проблем с Neo-tree при закрытии буферов
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = "*",
+  callback = function()
+    -- Проверяем, что это Neo-tree и что мы попали сюда не намеренно
+    if vim.bo.filetype == "neo-tree" then
+      -- Считаем количество обычных окон (не Neo-tree)
+      local normal_wins = 0
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].filetype ~= "neo-tree" and vim.bo[buf].filetype ~= "alpha" then
+          normal_wins = normal_wins + 1
+        end
+      end
+      
+      -- Если нет обычных окон, создаем новый буфер
+      if normal_wins == 0 then
+        vim.cmd("wincmd l")
+        vim.cmd("enew")
+      end
+    end
   end,
 })
 
