@@ -4,71 +4,78 @@ return {
     "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
-    opts = {},
+    opts = {
+      transparent = true,
+      styles = {
+        sidebars = "transparent",
+        floats = "transparent",
+      },
+    },
   },
-  
 
-{
-  "nvim-neo-tree/neo-tree.nvim",
-  branch = "v3.x",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons", -- иконки
-    "MunifTanjim/nui.nvim",        -- UI-компоненты
-  },
-  config = function()
-    local function getTelescopeOpts(state, path)
-      return {
-        cwd = path,
-        search_dirs = { path },
-        attach_mappings = function(prompt_bufnr, map)
-          local actions = require("telescope.actions")
-          actions.select_default:replace(function()
-            actions.close(prompt_bufnr)
-            local action_state = require("telescope.actions.state")
-            local selection = action_state.get_selected_entry()
-            local filename = selection.filename
-            if (filename == nil) then
-              filename = selection[1]
-            end
-            require("neo-tree.sources.filesystem").navigate(state, state.path, filename)
-          end)
-          return true
-        end
-      }
-    end
 
-    require("neo-tree").setup({
-      filesystem = {
-        window = {
-          mappings = {
-            ["tf"] = "telescope_find",
-            ["tg"] = "telescope_grep",
-            ["<2-LeftMouse>"] = "open",
-            ["<cr>"] = "open_tabnew",
-            ["<esc>"] = "cancel",
-            ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- иконки
+      "MunifTanjim/nui.nvim",        -- UI-компоненты
+    },
+    config = function()
+      local function getTelescopeOpts(state, path)
+        return {
+          cwd = path,
+          search_dirs = { path },
+          attach_mappings = function(prompt_bufnr, map)
+            local actions = require("telescope.actions")
+            actions.select_default:replace(function()
+              actions.close(prompt_bufnr)
+              local action_state = require("telescope.actions.state")
+              local selection = action_state.get_selected_entry()
+              local filename = selection.filename
+              if (filename == nil) then
+                filename = selection[1]
+              end
+              require("neo-tree.sources.filesystem").navigate(state, state.path, filename)
+            end)
+            return true
+          end
+        }
+      end
+
+      require("neo-tree").setup({
+        filesystem = {
+          window = {
+            mappings = {
+              ["tf"] = "telescope_find",
+              ["tg"] = "telescope_grep",
+              ["<2-LeftMouse>"] = "open",
+              ["<cr>"] = "open_tabnew",
+              ["<esc>"] = "cancel",
+              ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+            },
+          },
+          commands = {
+            telescope_find = function(state)
+              local node = state.tree:get_node()
+              local path = node:get_id()
+              require('telescope.builtin').find_files(getTelescopeOpts(state, path))
+            end,
+            telescope_grep = function(state)
+              local node = state.tree:get_node()
+              local path = node:get_id()
+              require('telescope.builtin').live_grep(getTelescopeOpts(state, path))
+            end,
           },
         },
-        commands = {
-          telescope_find = function(state)
-            local node = state.tree:get_node()
-            local path = node:get_id()
-            require('telescope.builtin').find_files(getTelescopeOpts(state, path))
-          end,
-          telescope_grep = function(state)
-            local node = state.tree:get_node()
-            local path = node:get_id()
-            require('telescope.builtin').live_grep(getTelescopeOpts(state, path))
-          end,
-        },
-      },
-    })
-  end
-},
+      })
+    end
+  },
   -- Telescope
   {
-    "nvim-telescope/telescope.nvim", tag = "0.1.6",
+    "nvim-telescope/telescope.nvim",
+    tag = "0.1.6",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local telescope = require("telescope.builtin")
@@ -87,8 +94,8 @@ return {
       require("nvim-treesitter.configs").setup {
         ensure_installed = { "lua", "javascript", "typescript", "html", "css", "json", "yaml", "markdown", "python" }, -- Добавь языки, которые используешь
         highlight = {
-          enable = true,  -- Включает подсветку синтаксиса на основе Treesitter
-          disable = { "latex" }, -- Отключить подсветку для конкретных языков, если нужно
+          enable = true,                                                                                               -- Включает подсветку синтаксиса на основе Treesitter
+          disable = { "latex" },                                                                                       -- Отключить подсветку для конкретных языков, если нужно
         },
         indent = {
           enable = true, -- Включает умные отступы на основе Treesitter
@@ -105,7 +112,7 @@ return {
         fold = {
           enable = true,
           fold_contiguous_min_lines = 1, -- Уменьшает минимальное количество строк для сворачивания
-          disable = { "typescript" }, -- Отключить сворачивание для конкретных языков
+          disable = { "typescript" },    -- Отключить сворачивание для конкретных языков
         },
       }
     end
@@ -166,7 +173,6 @@ return {
           { name = "buffer" }
         }
       })
-
     end,
   },
 
@@ -177,7 +183,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = "auto",
+        theme = require('config.lualine_transparent'),
         globalstatus = true,
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
@@ -195,11 +201,11 @@ return {
         lualine_z = { "location" },
       },
       inactive_sections = {
-        lualine_a = {}, 
-        lualine_b = {}, 
+        lualine_a = {},
+        lualine_b = {},
         lualine_c = { { "filename", path = 1 } },
         lualine_x = { "location" },
-        lualine_y = {}, 
+        lualine_y = {},
         lualine_z = {}
       },
       -- tabline = {
@@ -223,35 +229,38 @@ return {
         topdelete = { text = "‾" },
         changedelete = { text = "~" },
       },
+      current_line_blame = false,
+      linehl = true,
       on_attach = function(bufnr)
         local gs = require("gitsigns")
 
         local function map(mode, l, r, opts)
           opts = opts or {}
-          vim.keymap.set(mode, l, r, { buffer = bufnr, remap = true, expr = true, silent = true, noremap = true, desc = opts.desc })
+          vim.keymap.set(mode, l, r,
+            { buffer = bufnr, remap = true, expr = true, silent = true, noremap = true, desc = opts.desc })
         end
 
         -- Navigation
-        map("n", "]c", function() 
+        map("n", "]c", function()
           if vim.wo.diff then return "]c" end
           vim.schedule(function() gs.next_hunk() end)
           return ""
         end, { desc = "Next Hunk" })
 
-        map("n", "[c", function() 
+        map("n", "[c", function()
           if vim.wo.diff then return "[c" end
           vim.schedule(function() gs.prev_hunk() end)
           return ""
         end, { desc = "Prev Hunk" })
 
         -- Actions
-        map({"n", "v"}, "<leader>hs", ":Gitsigns stage_hunk<CR>", { desc = "Stage Hunk" })
-        map({"n", "v"}, "<leader>hr", ":Gitsigns reset_hunk<CR>", { desc = "Reset Hunk" })
+        map({ "n", "v" }, "<leader>hs", ":Gitsigns stage_hunk<CR>", { desc = "Stage Hunk" })
+        map({ "n", "v" }, "<leader>hr", ":Gitsigns reset_hunk<CR>", { desc = "Reset Hunk" })
         map("n", "<leader>hS", gs.stage_buffer, { desc = "Stage Buffer" })
         map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "Undo Stage Hunk" })
         map("n", "<leader>hR", gs.reset_buffer, { desc = "Reset Buffer" })
         map("n", "<leader>hp", gs.preview_hunk, { desc = "Preview Hunk" })
-        map("n", "<leader>hb", function() gs.blame_line{full=true} end, { desc = "Blame Line" })
+        map("n", "<leader>hb", function() gs.blame_line { full = true } end, { desc = "Blame Line" })
         map("n", "<leader>hD", gs.diffthis, { desc = "Diff This" })
         map("n", "<leader>hB", function() gs.diffthis("~") end, { desc = "Diff This ~" })
         map("n", "<leader>td", gs.toggle_deleted, { desc = "Toggle Deleted" })
@@ -370,7 +379,7 @@ return {
           code_action = '💡',
         },
         lightbulb = {
-          enable = true,
+          enable = false,
           sign = true,
           virtual_text = true,
         },
