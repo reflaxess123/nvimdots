@@ -631,7 +631,7 @@ return {
     config = function(_, opts)
       require("notify").setup(opts)
       vim.notify = require("notify")
-      
+
       -- Горячая клавиша для истории уведомлений
       vim.keymap.set("n", "<leader>nh", ":Notifications<CR>", { desc = "Show notification history" })
     end,
@@ -696,24 +696,24 @@ return {
           },
         },
       })
-      
+
       -- Горячие клавиши
       local Terminal = require("toggleterm.terminal").Terminal
-      
+
       -- Горизонтальный терминал
       vim.keymap.set("n", "<leader>th", ":ToggleTerm direction=horizontal<CR>", { desc = "Horizontal terminal" })
-      
+
       -- Вертикальный терминал
       vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical size=80<CR>", { desc = "Vertical terminal" })
-      
+
       -- Плавающий терминал
       vim.keymap.set("n", "<leader>tf", ":ToggleTerm direction=float<CR>", { desc = "Float terminal" })
-      
+
       -- Несколько плавающих терминалов
       vim.keymap.set("n", "<leader>t1", ":1ToggleTerm direction=float<CR>", { desc = "Float terminal 1" })
       vim.keymap.set("n", "<leader>t2", ":2ToggleTerm direction=float<CR>", { desc = "Float terminal 2" })
       vim.keymap.set("n", "<leader>t3", ":3ToggleTerm direction=float<CR>", { desc = "Float terminal 3" })
-      
+
       -- Lazygit (если установлен)
       local lazygit = Terminal:new({
         cmd = "lazygit",
@@ -724,18 +724,18 @@ return {
         },
         on_open = function(term)
           vim.cmd("startinsert!")
-          vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
+          vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", { noremap = true, silent = true })
         end,
         on_close = function(term)
           vim.cmd("startinsert!")
         end,
       })
-      
+
       vim.keymap.set("n", "<leader>tg", function() lazygit:toggle() end, { desc = "Lazygit" })
-      
+
       -- Настройка клавиш в терминале
       function _G.set_terminal_keymaps()
-        local opts = {buffer = 0}
+        local opts = { buffer = 0 }
         vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
         vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
         vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
@@ -743,7 +743,7 @@ return {
         vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
         vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
       end
-      
+
       vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
     end,
   },
@@ -768,7 +768,7 @@ return {
         fold_markers = { '', '' },
         wrap = false,
         keymaps = {
-          close = {"<Esc>", "q"},
+          close = { "<Esc>", "q" },
           goto_location = "<Cr>",
           focus_location = "o",
           hover_symbol = "<C-space>",
@@ -814,7 +814,7 @@ return {
           Fragment = { icon = "", hl = "@constant" },
         },
       })
-      
+
       -- Горячие клавиши
       vim.keymap.set("n", "<leader>o", ":SymbolsOutline<CR>", { desc = "Toggle symbols outline" })
       vim.keymap.set("n", "<leader>so", ":SymbolsOutlineOpen<CR>", { desc = "Open symbols outline" })
@@ -832,7 +832,7 @@ return {
         callback = function()
           local filename = vim.fn.expand("%:t")
           local filepath = vim.fn.expand("%:p")
-          
+
           -- Игнорируем временные файлы и системные папки
           local ignored_patterns = {
             "%.git/",
@@ -842,13 +842,13 @@ return {
             "%.log$",
             "nvim%-data",
           }
-          
+
           for _, pattern in ipairs(ignored_patterns) do
             if string.match(filepath, pattern) then
               return
             end
           end
-          
+
           vim.notify(
             string.format("📝 Файл сохранен: %s", filename),
             vim.log.levels.INFO,
@@ -859,7 +859,7 @@ return {
           )
         end,
       })
-      
+
       -- Уведомление при создании нового файла
       vim.api.nvim_create_autocmd("BufNewFile", {
         pattern = "*",
@@ -877,7 +877,7 @@ return {
           end
         end,
       })
-      
+
       -- Уведомление при удалении файла (через Neovim)
       vim.api.nvim_create_autocmd("BufDelete", {
         pattern = "*",
@@ -1129,7 +1129,6 @@ return {
           },
         },
       })
-
     end,
   },
   -- Inline diff viewer как в Cursor
@@ -1163,15 +1162,15 @@ return {
     "lewis6991/gitsigns.nvim",
     config = function()
       -- Устанавливаем яркие цвета по умолчанию для unstaged изменений
-      vim.api.nvim_set_hl(0, 'GitSignsAdd', { fg = '#9ece6a', ctermfg = 107 })     -- Зеленый для unstaged
-      vim.api.nvim_set_hl(0, 'GitSignsChange', { fg = '#e0af68', ctermfg = 179 })  -- Желтый для unstaged
-      vim.api.nvim_set_hl(0, 'GitSignsDelete', { fg = '#f7768e', ctermfg = 203 })  -- Красный для unstaged
-      
+      vim.api.nvim_set_hl(0, 'GitSignsAdd', { fg = '#9ece6a', ctermfg = 107 })    -- Зеленый для unstaged
+      vim.api.nvim_set_hl(0, 'GitSignsChange', { fg = '#e0af68', ctermfg = 179 }) -- Желтый для unstaged
+      vim.api.nvim_set_hl(0, 'GitSignsDelete', { fg = '#f7768e', ctermfg = 203 }) -- Красный для unstaged
+
       -- Яркие фоны для строк
       vim.api.nvim_set_hl(0, 'GitSignsAddLn', { bg = '#2d5a2d', fg = 'NONE' })
       vim.api.nvim_set_hl(0, 'GitSignsChangeLn', { bg = '#5a5a2d', fg = 'NONE' })
       vim.api.nvim_set_hl(0, 'GitSignsDeleteLn', { bg = '#5a2d2d', fg = 'NONE' })
-      
+
       -- Яркие inline цвета
       vim.api.nvim_set_hl(0, 'GitSignsAddInline', { bg = '#3d7a3d', fg = 'NONE' })
       vim.api.nvim_set_hl(0, 'GitSignsChangeInline', { bg = '#7a7a3d', fg = 'NONE' })
@@ -1335,16 +1334,22 @@ return {
       vim.keymap.set("n", "<leader>gp", function()
         require('gitsigns').prev_hunk()
       end, { desc = "Previous change" })
-      
+
+      -- Простое Git Status окно в Telescope
+      vim.keymap.set("n", "<leader>gs", function()
+        require('telescope.builtin').git_status()
+      end, { desc = "Git Status" })
+
       -- Настройка which-key для git команд
       local ok, wk = pcall(require, "which-key")
       if ok then
         wk.register({
           g = {
-            name = "🔀 Git", 
+            name = "🔀 Git",
             I = { "Toggle inline highlighting" },
             n = { "Next change" },
             p = { "Previous change" },
+            s = { "Git Status" },
           },
           h = {
             name = "🔧 Hunks",

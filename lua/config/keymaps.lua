@@ -105,3 +105,6 @@ vim.keymap.set("n", "<C-d>", function()
     vim.notify("No diagnostics at cursor position")
   end
 end, { desc = "Copy diagnostic info to clipboard" })
+
+-- Быстрый выход на двойной Esc
+vim.keymap.set("n", "<Esc><Esc>", ":qa!<CR>", { desc = "Quick force exit Neovim" })
