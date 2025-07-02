@@ -821,4 +821,106 @@ return {
       vim.keymap.set("n", "<leader>sc", ":SymbolsOutlineClose<CR>", { desc = "Close symbols outline" })
     end,
   },
+  -- Уведомления об изменениях файлов
+  {
+    "nvim-lua/plenary.nvim", -- используем plenary для автокоманд
+    config = function()
+      -- Настройка автокоманд для отслеживания изменений
+      -- Уведомление при сохранении файла
+      vim.api.nvim_create_autocmd("BufWritePost", {
+        pattern = "*",
+        callback = function()
+          local filename = vim.fn.expand("%:t")
+          local filepath = vim.fn.expand("%:p")
+          
+          -- Игнорируем временные файлы и системные папки
+          local ignored_patterns = {
+            "%.git/",
+            "node_modules/",
+            "%.tmp$",
+            "%.swp$",
+            "%.log$",
+            "nvim%-data",
+          }
+          
+          for _, pattern in ipairs(ignored_patterns) do
+            if string.match(filepath, pattern) then
+              return
+            end
+          end
+          
+          vim.notify(
+            string.format("📝 Файл сохранен: %s", filename),
+            vim.log.levels.INFO,
+            {
+              title = "File Changed",
+              timeout = 2000,
+            }
+          )
+        end,
+      })
+      
+      -- Уведомление при создании нового файла
+      vim.api.nvim_create_autocmd("BufNewFile", {
+        pattern = "*",
+        callback = function()
+          local filename = vim.fn.expand("%:t")
+          if filename ~= "" then
+            vim.notify(
+              string.format("✨ Новый файл: %s", filename),
+              vim.log.levels.INFO,
+              {
+                title = "New File",
+                timeout = 2000,
+              }
+            )
+          end
+        end,
+      })
+      
+      -- Уведомление при удалении файла (через Neovim)
+      vim.api.nvim_create_autocmd("BufDelete", {
+        pattern = "*",
+        callback = function()
+          local filename = vim.fn.expand("%:t")
+          if filename ~= "" and not string.match(filename, "^term://") then
+            vim.notify(
+              string.format("🗑️  Файл закрыт: %s", filename),
+              vim.log.levels.WARN,
+              {
+                title = "File Closed",
+                timeout = 1500,
+              }
+            )
+          end
+        end,
+      })
+      
+      -- Отслеживание изменений файлов извне (например, от агентов)
+      vim.api.nvim_create_autocmd("FocusGained", {
+        pattern = "*",
+        callback = function()
+          vim.cmd("checktime") -- Проверить изменения файлов
+        end,
+      })
+      
+      vim.api.nvim_create_autocmd("FileChangedShellPost", {
+        pattern = "*",
+        callback = function()
+          local filename = vim.fn.expand("%:t")
+          vim.notify(
+            string.format("⚠️  Файл изменен извне: %s", filename),
+            vim.log.levels.WARN,
+            {
+              title = "External Change",
+              timeout = 3000,
+            }
+          )
+        end,
+      })
+      
+      -- Настройка для автоматической перезагрузки
+      vim.opt.autoread = true
+    end,
+  },
 }
