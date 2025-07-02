@@ -126,7 +126,7 @@ return {
             ["A"] = "add_directory",
             ["d"] = "delete",
             ["r"] = "rename",
-            ["y"] = "copy_to_clipboard",
+            ["y"] = "copy_path_to_clipboard",
             ["x"] = "cut_to_clipboard",
             ["p"] = "paste_from_clipboard",
             ["c"] = "copy",
@@ -185,6 +185,8 @@ return {
               ["]g"] = "next_git_modified",
               ["tf"] = "telescope_find",
               ["tg"] = "telescope_grep",
+              ["Y"] = "copy_path_to_clipboard",
+              ["<C-y>"] = "copy_paths_to_clipboard",
             },
             fuzzy_finder_mappings = {
               ["<down>"] = "move_cursor_down",
@@ -203,6 +205,44 @@ return {
               local node = state.tree:get_node()
               local path = node:get_id()
               require('telescope.builtin').live_grep(getTelescopeOpts(state, path))
+            end,
+            copy_path_to_clipboard = function(state)
+              local node = state.tree:get_node()
+              local path = node:get_id()
+              vim.fn.setreg('+', path)
+              vim.notify("Path copied to clipboard: " .. path)
+            end,
+            copy_paths_to_clipboard = function(state)
+              local tree = state.tree
+              local selected_paths = {}
+              
+              -- Получаем выделенные узлы через renderer
+              local renderer = require("neo-tree.ui.renderer")
+              local manager = require("neo-tree.sources.manager")
+              local events = require("neo-tree.events")
+              
+              -- Пытаемся получить выделенные узлы из состояния
+              if state.explicitly_opened_directories then
+                for node_id, _ in pairs(state.explicitly_opened_directories) do
+                  table.insert(selected_paths, node_id)
+                end
+              end
+              
+              -- Если ничего не выделено, берем текущий узел
+              if #selected_paths == 0 then
+                local current_node = tree:get_node()
+                if current_node then
+                  table.insert(selected_paths, current_node:get_id())
+                end
+              end
+              
+              if #selected_paths > 0 then
+                local paths_text = table.concat(selected_paths, "\n")
+                vim.fn.setreg('+', paths_text)
+                vim.notify("Paths copied to clipboard (" .. #selected_paths .. " files)")
+              else
+                vim.notify("No files to copy")
+              end
             end,
           }
         },

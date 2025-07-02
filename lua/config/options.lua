@@ -113,3 +113,23 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end,
 })
+
+-- Автоматическое закрытие пустого [No Name] буфера при открытии файла
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function()
+    -- Проверяем есть ли пустой [No Name] буфер
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
+        local buf_name = vim.api.nvim_buf_get_name(buf)
+        local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+        
+        -- Если буфер пустой и без имени
+        if buf_name == "" and #buf_lines == 1 and buf_lines[1] == "" then
+          -- Удаляем пустой буфер
+          vim.api.nvim_buf_delete(buf, { force = true })
+          break
+        end
+      end
+    end
+  end,
+})
