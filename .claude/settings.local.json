@@ -7,7 +7,9 @@
       "Bash(git checkout:*)",
       "Bash(grep:*)",
       "Bash(vim:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(pwsh:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }
