@@ -1,14 +1,14 @@
-vim.keymap.set({"n", "v"}, "y", '"+y')
-vim.keymap.set({"n", "v"}, "yy", '"+yy')
-vim.keymap.set({"n", "v"}, "d", '"+d')
-vim.keymap.set({"n", "v"}, "dd", '"+dd')
-vim.keymap.set({"n", "v"}, "p", '"+p')
-vim.keymap.set({"n", "v"}, "P", '"+P')
+vim.keymap.set({ "n", "v" }, "y", '"+y', { nowait = true })
+vim.keymap.set({ "n", "v" }, "yy", '"+yy', { nowait = true })
+vim.keymap.set({ "n", "v" }, "d", '"+d', { nowait = true })
+vim.keymap.set({ "n", "v" }, "dd", '"+dd', { nowait = true })
+vim.keymap.set({ "n", "v" }, "p", '"+p', { nowait = true })
+vim.keymap.set({ "n", "v" }, "P", '"+P', { nowait = true })
 
 -- Навигация по окнам
-vim.keymap.set("n", "<C-Left>",  "<C-w>h")
-vim.keymap.set("n", "<C-Down>",  "<C-w>j")
-vim.keymap.set("n", "<C-Up>",    "<C-w>k")
+vim.keymap.set("n", "<C-Left>", "<C-w>h")
+vim.keymap.set("n", "<C-Down>", "<C-w>j")
+vim.keymap.set("n", "<C-Up>", "<C-w>k")
 vim.keymap.set("n", "<C-Right>", "<C-w>l")
 
 -- Сохранение
@@ -21,7 +21,7 @@ vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle Neo-tre
 -- Форматирование вручную
 vim.keymap.set("n", "<leader>f", function()
   vim.lsp.buf.format({ async = true })
-end, { desc = "Format file" }) 
+end, { desc = "Format file" })
 
 -- Копирование в системный буфер
 local last_time = vim.loop.hrtime()
@@ -72,7 +72,7 @@ local function close_buffer()
       buf_count = buf_count + 1
     end
   end
-  
+
   if buf_count > 1 then
     vim.cmd("bprevious")
     vim.cmd("bdelete #")
@@ -85,4 +85,23 @@ end
 vim.keymap.set("n", "<leader>x", close_buffer, { desc = "Close current buffer" })
 
 -- Diagnostic keymaps
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostic message" })
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostic message", nowait = true })
+
+vim.keymap.set("n", "<C-d>", function()
+  local cursor_pos = vim.api.nvim_win_get_cursor(0) 
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local diagnostics = vim.diagnostic.get(0, { lnum = cursor_pos[1] - 1 })
+  
+  if #diagnostics > 0 then
+    local diagnostic = diagnostics[1]
+    local line_content = vim.api.nvim_buf_get_lines(0, cursor_pos[1] - 1, cursor_pos[1], false)[1] or ""
+    
+    local copy_text = string.format("File: %s\nLine %d: %s\nDiagnostic: %s",
+      current_file, cursor_pos[1], line_content, diagnostic.message)
+    
+    vim.fn.setreg('+', copy_text)
+    vim.notify("Diagnostic info copied to clipboard")
+  else
+    vim.notify("No diagnostics at cursor position")
+  end
+end, { desc = "Copy diagnostic info to clipboard" })

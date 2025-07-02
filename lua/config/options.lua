@@ -10,6 +10,10 @@ vim.opt.expandtab = true
 vim.opt.softtabstop = 2
 vim.opt.smartindent = true
 
+-- Убираем задержки для keymaps
+vim.opt.timeoutlen = 0
+vim.opt.ttimeoutlen = 0
+
 -- Убираем символы ~ в пустых строках
 vim.opt.fillchars = { eob = " " }
 
@@ -32,6 +36,8 @@ vim.cmd([[
   highlight VertSplit guibg=NONE ctermbg=NONE guifg=#565f89
   highlight WinSeparator guibg=NONE ctermbg=NONE guifg=#565f89
   highlight NeoTreeWinSeparator guibg=NONE ctermbg=NONE guifg=#565f89
+  highlight CursorLine guibg=NONE ctermbg=NONE
+  highlight CursorColumn guibg=NONE ctermbg=NONE
 ]])
 
 -- Автокоманда для принудительной прозрачности
@@ -51,6 +57,8 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       highlight VertSplit guibg=NONE ctermbg=NONE guifg=#565f89
       highlight WinSeparator guibg=NONE ctermbg=NONE guifg=#565f89
       highlight NeoTreeWinSeparator guibg=NONE ctermbg=NONE guifg=#565f89
+      highlight CursorLine guibg=NONE ctermbg=NONE
+      highlight CursorColumn guibg=NONE ctermbg=NONE
       highlight lualine_a_normal guibg=NONE ctermbg=NONE
       highlight lualine_b_normal guibg=NONE ctermbg=NONE
       highlight lualine_c_normal guibg=NONE ctermbg=NONE
@@ -96,7 +104,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
           normal_wins = normal_wins + 1
         end
       end
-      
+
       -- Если нет обычных окон, создаем новый буфер
       if normal_wins == 0 then
         vim.cmd("wincmd l")
@@ -105,4 +113,3 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end,
 })
-
