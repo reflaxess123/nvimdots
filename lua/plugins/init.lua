@@ -895,7 +895,7 @@ return {
           end
         end,
       })
-      
+
       -- Отслеживание изменений файлов извне (например, от агентов)
       vim.api.nvim_create_autocmd("FocusGained", {
         pattern = "*",
@@ -903,7 +903,7 @@ return {
           vim.cmd("checktime") -- Проверить изменения файлов
         end,
       })
-      
+
       vim.api.nvim_create_autocmd("FileChangedShellPost", {
         pattern = "*",
         callback = function()
@@ -918,9 +918,448 @@ return {
           )
         end,
       })
-      
+
       -- Настройка для автоматической перезагрузки
       vim.opt.autoread = true
+    end,
+  },
+  -- Git конфликты и diff acceptor
+  {
+    "akinsho/git-conflict.nvim",
+    version = "*",
+    config = function()
+      require('git-conflict').setup({
+        default_mappings = true,
+        default_commands = true,
+        disable_diagnostics = false,
+        list_opener = 'copen',
+        highlights = {
+          incoming = 'DiffAdd',
+          current = 'DiffText',
+        }
+      })
+
+      -- Горячие клавиши для работы с конфликтами
+      vim.keymap.set('n', '<leader>co', '<Plug>(git-conflict-ours)', { desc = 'Accept current change' })
+      vim.keymap.set('n', '<leader>ct', '<Plug>(git-conflict-theirs)', { desc = 'Accept incoming change' })
+      vim.keymap.set('n', '<leader>cb', '<Plug>(git-conflict-both)', { desc = 'Accept both changes' })
+      vim.keymap.set('n', '<leader>c0', '<Plug>(git-conflict-none)', { desc = 'Accept none' })
+      vim.keymap.set('n', '<leader>cn', '<Plug>(git-conflict-next-conflict)', { desc = 'Next conflict' })
+      vim.keymap.set('n', '<leader>cp', '<Plug>(git-conflict-prev-conflict)', { desc = 'Previous conflict' })
+    end,
+  },
+  -- Улучшенный diff viewer
+  {
+    "sindrets/diffview.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("diffview").setup({
+        diff_binaries = false,
+        enhanced_diff_hl = true,
+        git_cmd = { "git" },
+        use_icons = true,
+        show_help_hints = true,
+        watch_index = true,
+        icons = {
+          folder_closed = "",
+          folder_open = "",
+        },
+        signs = {
+          fold_closed = "",
+          fold_open = "",
+          done = "✓",
+        },
+        view = {
+          default = {
+            layout = "diff2_horizontal",
+            winbar_info = false,
+          },
+          merge_tool = {
+            layout = "diff3_horizontal",
+            disable_diagnostics = true,
+            winbar_info = true,
+          },
+          file_history = {
+            layout = "diff2_horizontal",
+            winbar_info = false,
+          },
+        },
+        file_panel = {
+          listing_style = "tree",
+          tree_options = {
+            flatten_dirs = true,
+            folder_statuses = "only_folded",
+          },
+          win_config = {
+            position = "left",
+            width = 35,
+            win_opts = {}
+          },
+        },
+        file_history_panel = {
+          log_options = {
+            git = {
+              single_file = {
+                diff_merges = "combined",
+              },
+              multi_file = {
+                diff_merges = "first-parent",
+              },
+            },
+          },
+          win_config = {
+            position = "bottom",
+            height = 16,
+            win_opts = {}
+          },
+        },
+        commit_log_panel = {
+          win_config = {
+            win_opts = {},
+          }
+        },
+        default_args = {
+          DiffviewOpen = {},
+          DiffviewFileHistory = {},
+        },
+        hooks = {},
+        keymaps = {
+          disable_defaults = false,
+          view = {
+            { "n", "<tab>",      "<Cmd>DiffviewToggleFiles<CR>",          { desc = "Toggle file panel" } },
+            { "n", "gf",         "<Cmd>DiffviewToggleFiles<CR>",          { desc = "Toggle file panel" } },
+            { "n", "<leader>e",  "<Cmd>DiffviewToggleFiles<CR>",          { desc = "Toggle file panel" } },
+            { "n", "<leader>co", "<Cmd>DiffviewConflictChooseOurs<CR>",   { desc = "Choose ours" } },
+            { "n", "<leader>ct", "<Cmd>DiffviewConflictChooseTheirs<CR>", { desc = "Choose theirs" } },
+            { "n", "<leader>cb", "<Cmd>DiffviewConflictChooseBoth<CR>",   { desc = "Choose both" } },
+            { "n", "<leader>cn", "<Cmd>DiffviewConflictChooseNone<CR>",   { desc = "Choose none" } },
+            { "n", "dx",         "<Cmd>DiffviewConflictChooseNone<CR>",   { desc = "Delete conflict" } },
+          },
+          diff1 = {
+            { "n", "g?", "<Cmd>h diffview-maps-diff1<CR>", { desc = "Open help" } },
+          },
+          diff2 = {
+            { "n", "g?", "<Cmd>h diffview-maps-diff2<CR>", { desc = "Open help" } },
+          },
+          diff3 = {
+            { "n", "g?",         "<Cmd>h diffview-maps-diff3<CR>",        { desc = "Open help" } },
+            { "n", "<leader>co", "<Cmd>DiffviewConflictChooseOurs<CR>",   { desc = "Choose ours (local)" } },
+            { "n", "<leader>cm", "<Cmd>DiffviewConflictChooseBase<CR>",   { desc = "Choose base" } },
+            { "n", "<leader>ct", "<Cmd>DiffviewConflictChooseTheirs<CR>", { desc = "Choose theirs (remote)" } },
+          },
+          diff4 = {
+            { "n", "g?",         "<Cmd>h diffview-maps-diff4<CR>",        { desc = "Open help" } },
+            { "n", "<leader>co", "<Cmd>DiffviewConflictChooseOurs<CR>",   { desc = "Choose ours (local)" } },
+            { "n", "<leader>cm", "<Cmd>DiffviewConflictChooseBase<CR>",   { desc = "Choose base" } },
+            { "n", "<leader>ct", "<Cmd>DiffviewConflictChooseTheirs<CR>", { desc = "Choose theirs (remote)" } },
+            { "n", "<leader>ca", "<Cmd>DiffviewConflictChooseAll<CR>",    { desc = "Choose all" } },
+            { "n", "dx",         "<Cmd>DiffviewConflictChooseNone<CR>",   { desc = "Delete conflict" } },
+          },
+          file_panel = {
+            { "n", "j",             "<Cmd>lua require'diffview.actions'.next_entry()<CR>",          { desc = "Next entry" } },
+            { "n", "<down>",        "<Cmd>lua require'diffview.actions'.next_entry()<CR>",          { desc = "Next entry" } },
+            { "n", "k",             "<Cmd>lua require'diffview.actions'.prev_entry()<CR>",          { desc = "Previous entry" } },
+            { "n", "<up>",          "<Cmd>lua require'diffview.actions'.prev_entry()<CR>",          { desc = "Previous entry" } },
+            { "n", "<cr>",          "<Cmd>lua require'diffview.actions'.select_entry()<CR>",        { desc = "Open diff" } },
+            { "n", "o",             "<Cmd>lua require'diffview.actions'.select_entry()<CR>",        { desc = "Open diff" } },
+            { "n", "l",             "<Cmd>lua require'diffview.actions'.select_entry()<CR>",        { desc = "Open diff" } },
+            { "n", "<2-LeftMouse>", "<Cmd>lua require'diffview.actions'.select_entry()<CR>",        { desc = "Open diff" } },
+            { "n", "-",             "<Cmd>lua require'diffview.actions'.toggle_stage_entry()<CR>",  { desc = "Stage/unstage" } },
+            { "n", "S",             "<Cmd>lua require'diffview.actions'.stage_all()<CR>",           { desc = "Stage all" } },
+            { "n", "U",             "<Cmd>lua require'diffview.actions'.unstage_all()<CR>",         { desc = "Unstage all" } },
+            { "n", "X",             "<Cmd>lua require'diffview.actions'.restore_entry()<CR>",       { desc = "Restore entry" } },
+            { "n", "L",             "<Cmd>lua require'diffview.actions'.open_commit_log()<CR>",     { desc = "Open commit log" } },
+            { "n", "zo",            "<Cmd>lua require'diffview.actions'.open_fold()<CR>",           { desc = "Expand fold" } },
+            { "n", "h",             "<Cmd>lua require'diffview.actions'.close_fold()<CR>",          { desc = "Close fold" } },
+            { "n", "zc",            "<Cmd>lua require'diffview.actions'.close_fold()<CR>",          { desc = "Close fold" } },
+            { "n", "za",            "<Cmd>lua require'diffview.actions'.toggle_fold()<CR>",         { desc = "Toggle fold" } },
+            { "n", "zR",            "<Cmd>lua require'diffview.actions'.open_all_folds()<CR>",      { desc = "Expand all folds" } },
+            { "n", "zM",            "<Cmd>lua require'diffview.actions'.close_all_folds()<CR>",     { desc = "Close all folds" } },
+            { "n", "<c-b>",         "<Cmd>lua require'diffview.actions'.scroll_view(-0.25)<CR>",    { desc = "Scroll up" } },
+            { "n", "<c-f>",         "<Cmd>lua require'diffview.actions'.scroll_view(0.25)<CR>",     { desc = "Scroll down" } },
+            { "n", "<tab>",         "<Cmd>lua require'diffview.actions'.select_next_entry()<CR>",   { desc = "Next entry" } },
+            { "n", "<s-tab>",       "<Cmd>lua require'diffview.actions'.select_prev_entry()<CR>",   { desc = "Previous entry" } },
+            { "n", "gf",            "<Cmd>lua require'diffview.actions'.goto_file_edit()<CR>",      { desc = "Go to file" } },
+            { "n", "<C-w><C-f>",    "<Cmd>lua require'diffview.actions'.goto_file_split()<CR>",     { desc = "Go to file in split" } },
+            { "n", "<C-w>gf",       "<Cmd>lua require'diffview.actions'.goto_file_tab()<CR>",       { desc = "Go to file in tab" } },
+            { "n", "i",             "<Cmd>lua require'diffview.actions'.listing_style()<CR>",       { desc = "Toggle listing style" } },
+            { "n", "f",             "<Cmd>lua require'diffview.actions'.toggle_flatten_dirs()<CR>", { desc = "Toggle flatten dirs" } },
+            { "n", "R",             "<Cmd>lua require'diffview.actions'.refresh_files()<CR>",       { desc = "Refresh" } },
+            { "n", "<leader>e",     "<Cmd>lua require'diffview.actions'.focus_files()<CR>",         { desc = "Focus files" } },
+            { "n", "<leader>b",     "<Cmd>lua require'diffview.actions'.toggle_files()<CR>",        { desc = "Toggle files" } },
+            { "n", "g<C-x>",        "<Cmd>lua require'diffview.actions'.cycle_layout()<CR>",        { desc = "Cycle layout" } },
+            { "n", "[x",            "<Cmd>lua require'diffview.actions'.prev_conflict()<CR>",       { desc = "Previous conflict" } },
+            { "n", "]x",            "<Cmd>lua require'diffview.actions'.next_conflict()<CR>",       { desc = "Next conflict" } },
+            { "n", "g?",            "<Cmd>lua require'diffview.actions'.help('file_panel')<CR>",    { desc = "Open help" } },
+          },
+          file_history_panel = {
+            { "n", "g!",            "<Cmd>lua require'diffview.actions'.options()<CR>",                  { desc = "Open options" } },
+            { "n", "<C-A-d>",       "<Cmd>lua require'diffview.actions'.open_in_diffview()<CR>",         { desc = "Open in diffview" } },
+            { "n", "y",             "<Cmd>lua require'diffview.actions'.copy_hash()<CR>",                { desc = "Copy hash" } },
+            { "n", "L",             "<Cmd>lua require'diffview.actions'.open_commit_log()<CR>",          { desc = "Show commit details" } },
+            { "n", "zR",            "<Cmd>lua require'diffview.actions'.open_all_folds()<CR>",           { desc = "Expand all folds" } },
+            { "n", "zM",            "<Cmd>lua require'diffview.actions'.close_all_folds()<CR>",          { desc = "Close all folds" } },
+            { "n", "j",             "<Cmd>lua require'diffview.actions'.next_entry()<CR>",               { desc = "Next entry" } },
+            { "n", "<down>",        "<Cmd>lua require'diffview.actions'.next_entry()<CR>",               { desc = "Next entry" } },
+            { "n", "k",             "<Cmd>lua require'diffview.actions'.prev_entry()<CR>",               { desc = "Previous entry" } },
+            { "n", "<up>",          "<Cmd>lua require'diffview.actions'.prev_entry()<CR>",               { desc = "Previous entry" } },
+            { "n", "<cr>",          "<Cmd>lua require'diffview.actions'.select_entry()<CR>",             { desc = "Open diff" } },
+            { "n", "o",             "<Cmd>lua require'diffview.actions'.select_entry()<CR>",             { desc = "Open diff" } },
+            { "n", "<2-LeftMouse>", "<Cmd>lua require'diffview.actions'.select_entry()<CR>",             { desc = "Open diff" } },
+            { "n", "<c-b>",         "<Cmd>lua require'diffview.actions'.scroll_view(-0.25)<CR>",         { desc = "Scroll up" } },
+            { "n", "<c-f>",         "<Cmd>lua require'diffview.actions'.scroll_view(0.25)<CR>",          { desc = "Scroll down" } },
+            { "n", "<tab>",         "<Cmd>lua require'diffview.actions'.select_next_entry()<CR>",        { desc = "Next entry" } },
+            { "n", "<s-tab>",       "<Cmd>lua require'diffview.actions'.select_prev_entry()<CR>",        { desc = "Previous entry" } },
+            { "n", "gf",            "<Cmd>lua require'diffview.actions'.goto_file_edit()<CR>",           { desc = "Go to file" } },
+            { "n", "<C-w><C-f>",    "<Cmd>lua require'diffview.actions'.goto_file_split()<CR>",          { desc = "Go to file in split" } },
+            { "n", "<C-w>gf",       "<Cmd>lua require'diffview.actions'.goto_file_tab()<CR>",            { desc = "Go to file in tab" } },
+            { "n", "<leader>e",     "<Cmd>lua require'diffview.actions'.focus_files()<CR>",              { desc = "Focus files" } },
+            { "n", "<leader>b",     "<Cmd>lua require'diffview.actions'.toggle_files()<CR>",             { desc = "Toggle files" } },
+            { "n", "g<C-x>",        "<Cmd>lua require'diffview.actions'.cycle_layout()<CR>",             { desc = "Cycle layout" } },
+            { "n", "g?",            "<Cmd>lua require'diffview.actions'.help('file_history_panel')<CR>", { desc = "Open help" } },
+          },
+          option_panel = {
+            { "n", "<tab>", "<Cmd>lua require'diffview.actions'.select_entry()<CR>",       { desc = "Change option" } },
+            { "n", "q",     "<Cmd>lua require'diffview.actions'.close()<CR>",              { desc = "Close" } },
+            { "n", "g?",    "<Cmd>lua require'diffview.actions'.help('option_panel')<CR>", { desc = "Open help" } },
+          },
+          help_panel = {
+            { "n", "q",     "<Cmd>lua require'diffview.actions'.close()<CR>", { desc = "Close help" } },
+            { "n", "<esc>", "<Cmd>lua require'diffview.actions'.close()<CR>", { desc = "Close help" } },
+          },
+        },
+      })
+
+    end,
+  },
+  -- Inline diff viewer как в Cursor
+  {
+    "linrongbin16/gitlinker.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("gitlinker").setup()
+    end,
+  },
+  -- Улучшенный inline diff
+  {
+    "sindrets/diffview.nvim",
+    config = function()
+      -- Дополнительная настройка для inline режима
+      vim.keymap.set("n", "<leader>gi", function()
+        -- Переключение в inline режим diff
+        vim.cmd("windo diffthis")
+        vim.notify("🔄 Inline diff mode activated", vim.log.levels.INFO, { title = "Inline Diff" })
+      end, { desc = "Toggle inline diff" })
+
+      vim.keymap.set("n", "<leader>gx", function()
+        -- Выключение inline режима
+        vim.cmd("windo diffoff")
+        vim.notify("❌ Inline diff mode disabled", vim.log.levels.INFO, { title = "Inline Diff" })
+      end, { desc = "Exit inline diff" })
+    end,
+  },
+  -- Inline hunks viewer
+  {
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      -- Устанавливаем яркие цвета по умолчанию для unstaged изменений
+      vim.api.nvim_set_hl(0, 'GitSignsAdd', { fg = '#9ece6a', ctermfg = 107 })     -- Зеленый для unstaged
+      vim.api.nvim_set_hl(0, 'GitSignsChange', { fg = '#e0af68', ctermfg = 179 })  -- Желтый для unstaged
+      vim.api.nvim_set_hl(0, 'GitSignsDelete', { fg = '#f7768e', ctermfg = 203 })  -- Красный для unstaged
+      
+      -- Яркие фоны для строк
+      vim.api.nvim_set_hl(0, 'GitSignsAddLn', { bg = '#2d5a2d', fg = 'NONE' })
+      vim.api.nvim_set_hl(0, 'GitSignsChangeLn', { bg = '#5a5a2d', fg = 'NONE' })
+      vim.api.nvim_set_hl(0, 'GitSignsDeleteLn', { bg = '#5a2d2d', fg = 'NONE' })
+      
+      -- Яркие inline цвета
+      vim.api.nvim_set_hl(0, 'GitSignsAddInline', { bg = '#3d7a3d', fg = 'NONE' })
+      vim.api.nvim_set_hl(0, 'GitSignsChangeInline', { bg = '#7a7a3d', fg = 'NONE' })
+      vim.api.nvim_set_hl(0, 'GitSignsDeleteInline', { bg = '#7a3d3d', fg = 'NONE' })
+
+      require('gitsigns').setup({
+        signs = {
+          add          = { text = '+' },
+          change       = { text = '~' },
+          delete       = { text = '_' },
+          topdelete    = { text = '‾' },
+          changedelete = { text = '~' },
+          untracked    = { text = '┆' },
+        },
+        signcolumn = true, -- Включить колонку знаков
+        numhl = false,
+        linehl = false,
+        word_diff = false,
+        base = nil, -- Сравнивать с HEAD (по умолчанию)
+        diff_opts = {
+          algorithm = 'minimal',
+          internal = false,
+          indent_heuristic = true,
+          vertical = false,
+        },
+        watch_gitdir = {
+          interval = 1000,
+          follow_files = true
+        },
+        attach_to_untracked = true,
+        current_line_blame = false,
+        current_line_blame_opts = {
+          virt_text = true,
+          virt_text_pos = 'eol',
+          delay = 1000,
+          ignore_whitespace = false,
+        },
+        current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+        sign_priority = 6,
+        update_debounce = 100,
+        status_formatter = nil,
+        max_file_length = 40000,
+        preview_config = {
+          border = 'single',
+          style = 'minimal',
+          relative = 'cursor',
+          row = 0,
+          col = 1
+        },
+
+        on_attach = function(bufnr)
+          local gs = require('gitsigns')
+
+          local function map(mode, l, r, opts)
+            opts = opts or {}
+            opts.buffer = bufnr
+            vim.keymap.set(mode, l, r, opts)
+          end
+
+          -- Навигация между hunks
+          map('n', ']c', function()
+            if vim.wo.diff then return ']c' end
+            vim.schedule(function() gs.next_hunk() end)
+            return '<Ignore>'
+          end, { expr = true, desc = "Next hunk" })
+
+          map('n', '[c', function()
+            if vim.wo.diff then return '[c' end
+            vim.schedule(function() gs.prev_hunk() end)
+            return '<Ignore>'
+          end, { expr = true, desc = "Previous hunk" })
+
+          -- Inline diff actions
+          map('n', '<leader>hs', gs.stage_hunk, { desc = "Stage hunk" })
+          map('n', '<leader>hr', gs.reset_hunk, { desc = "Reset hunk" })
+          map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end,
+            { desc = "Stage selected hunk" })
+          map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end,
+            { desc = "Reset selected hunk" })
+          map('n', '<leader>hS', gs.stage_buffer, { desc = "Stage buffer" })
+          map('n', '<leader>hu', gs.undo_stage_hunk, { desc = "Undo stage hunk" })
+          map('n', '<leader>hR', gs.reset_buffer, { desc = "Reset buffer" })
+
+          -- Inline preview как в Cursor
+          map('n', '<leader>hp', function()
+            gs.preview_hunk_inline()
+          end, { desc = "Preview hunk inline" })
+
+          map('n', '<leader>hP', gs.preview_hunk, { desc = "Preview hunk in popup" })
+
+          -- Blame line
+          map('n', '<leader>hb', function() gs.blame_line { full = true } end, { desc = "Blame line" })
+          map('n', '<leader>hB', gs.toggle_current_line_blame, { desc = "Toggle line blame" })
+
+          -- Diff this
+          map('n', '<leader>hd', gs.diffthis, { desc = "Diff this" })
+          map('n', '<leader>hD', function() gs.diffthis('~') end, { desc = "Diff this ~" })
+
+          -- Toggle deleted
+          map('n', '<leader>td', gs.toggle_deleted, { desc = "Toggle deleted" })
+
+          -- Toggle word diff (как в Cursor)
+          map('n', '<leader>hw', function()
+            require('gitsigns').toggle_word_diff()
+            vim.notify("🔤 Word diff toggled", vim.log.levels.INFO, { title = "Git" })
+          end, { desc = "Toggle word diff" })
+
+          -- Show inline changes for current line
+          map('n', '<leader>hl', function()
+            gs.show()
+          end, { desc = "Show line changes" })
+
+          -- Принять/отклонить изменения как в Cursor
+          map('n', '<leader>ha', function()
+            gs.stage_hunk()
+            -- Обновляем gitsigns чтобы убрать зеленую подсветку
+            vim.defer_fn(function()
+              gs.refresh()
+            end, 100)
+            vim.notify("✅ Изменение принято", vim.log.levels.INFO, { title = "Git" })
+          end, { desc = "Accept hunk" })
+
+          map('n', '<leader>hx', function()
+            gs.reset_hunk()
+            vim.notify("❌ Изменение отклонено", vim.log.levels.WARN, { title = "Git" })
+          end, { desc = "Reject hunk" })
+
+          -- Text object
+          map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = "Select hunk" })
+        end
+      })
+
+      -- Настройка ярких цветов для inline diff
+      vim.api.nvim_set_hl(0, 'GitSignsAddLn', { bg = '#2d5a2d', fg = 'NONE' })        -- Ярче зеленый фон
+      vim.api.nvim_set_hl(0, 'GitSignsChangeLn', { bg = '#5a5a2d', fg = 'NONE' })     -- Ярче желтый фон
+      vim.api.nvim_set_hl(0, 'GitSignsDeleteLn', { bg = '#5a2d2d', fg = 'NONE' })     -- Ярче красный фон
+      vim.api.nvim_set_hl(0, 'GitSignsAddInline', { bg = '#3d7a3d', fg = 'NONE' })    -- Очень яркий зеленый для слов
+      vim.api.nvim_set_hl(0, 'GitSignsChangeInline', { bg = '#7a7a3d', fg = 'NONE' }) -- Очень яркий желтый для слов
+      vim.api.nvim_set_hl(0, 'GitSignsDeleteInline', { bg = '#7a3d3d', fg = 'NONE' }) -- Очень яркий красный для слов
+
+      -- Дополнительные яркие цвета для Telescope git diff
+      vim.api.nvim_set_hl(0, 'DiffAdd', { bg = '#2d5a2d', fg = '#90EE90' })               -- Яркий зеленый для добавлений
+      vim.api.nvim_set_hl(0, 'DiffDelete', { bg = '#5a2d2d', fg = '#FF6B6B' })            -- Яркий красный для удалений
+      vim.api.nvim_set_hl(0, 'DiffChange', { bg = '#5a5a2d', fg = '#FFD93D' })            -- Яркий желтый для изменений
+      vim.api.nvim_set_hl(0, 'DiffText', { bg = '#7a7a3d', fg = '#FFFFFF', bold = true }) -- Белый текст на ярком фоне
+
+      -- Команда для показа всех изменений inline
+      vim.keymap.set("n", "<leader>gI", function()
+        local gitsigns = require('gitsigns')
+        -- Включить line highlighting для всех изменений
+        vim.cmd("Gitsigns toggle_linehl")
+        vim.cmd("Gitsigns toggle_word_diff")
+        vim.notify("🎨 Inline highlighting enabled", vim.log.levels.INFO, { title = "Git Inline" })
+      end, { desc = "Toggle inline highlighting" })
+
+      -- Навигация по всем изменениям в проекте
+      vim.keymap.set("n", "<leader>gn", function()
+        require('gitsigns').next_hunk()
+      end, { desc = "Next change" })
+
+      vim.keymap.set("n", "<leader>gp", function()
+        require('gitsigns').prev_hunk()
+      end, { desc = "Previous change" })
+      
+      -- Настройка which-key для git команд
+      local ok, wk = pcall(require, "which-key")
+      if ok then
+        wk.register({
+          g = {
+            name = "🔀 Git", 
+            I = { "Toggle inline highlighting" },
+            n = { "Next change" },
+            p = { "Previous change" },
+          },
+          h = {
+            name = "🔧 Hunks",
+            a = { "Accept hunk" },
+            x = { "Reject hunk" },
+            p = { "Preview hunk inline" },
+            P = { "Preview hunk popup" },
+            s = { "Stage hunk" },
+            r = { "Reset hunk" },
+            w = { "Toggle word diff" },
+            b = { "Blame line" },
+            B = { "Toggle line blame" },
+          }
+        }, { prefix = "<leader>" })
+      end
     end,
   },
 }
