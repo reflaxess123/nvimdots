@@ -6,7 +6,8 @@
       "Bash(sed:*)",
       "Bash(git checkout:*)",
       "Bash(grep:*)",
-      "Bash(vim:*)"
+      "Bash(vim:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

@@ -620,4 +620,205 @@ return {
       { "nvim-treesitter/nvim-treesitter" }
     }
   },
+  -- Красивые уведомления
+  {
+    "rcarriga/nvim-notify",
+    opts = {
+      background_colour = "#000000",
+      render = "compact",
+      timeout = 3000,
+    },
+    config = function(_, opts)
+      require("notify").setup(opts)
+      vim.notify = require("notify")
+      
+      -- Горячая клавиша для истории уведомлений
+      vim.keymap.set("n", "<leader>nh", ":Notifications<CR>", { desc = "Show notification history" })
+    end,
+  },
+  -- Миниатюра кода (мини-карта)
+  {
+    "gorbit99/codewindow.nvim",
+    config = function()
+      local codewindow = require("codewindow")
+      codewindow.setup({
+        auto_enable = false,
+        minimap_width = 20,
+        width_multiplier = 4,
+        use_lsp = true,
+        use_treesitter = true,
+        use_git = true,
+      })
+      vim.keymap.set("n", "<leader>m", codewindow.toggle_minimap, { desc = "Toggle minimap" })
+    end,
+  },
+  -- Плавная прокрутка
+  {
+    "karb94/neoscroll.nvim",
+    config = function()
+      require("neoscroll").setup({
+        mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
+        hide_cursor = true,
+        stop_eof = true,
+        respect_scrolloff = false,
+        cursor_scrolls_alone = true,
+        easing_function = nil,
+        pre_hook = nil,
+        post_hook = nil,
+        performance_mode = false,
+      })
+    end,
+  },
+  -- Плавающий терминал
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    config = function()
+      require("toggleterm").setup({
+        size = 20,
+        open_mapping = [[<c-\>]],
+        hide_numbers = true,
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,
+        persist_size = true,
+        direction = "float",
+        close_on_exit = true,
+        shell = "pwsh",
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+          highlights = {
+            border = "Normal",
+            background = "Normal",
+          },
+        },
+      })
+      
+      -- Горячие клавиши
+      local Terminal = require("toggleterm.terminal").Terminal
+      
+      -- Горизонтальный терминал
+      vim.keymap.set("n", "<leader>th", ":ToggleTerm direction=horizontal<CR>", { desc = "Horizontal terminal" })
+      
+      -- Вертикальный терминал
+      vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical size=80<CR>", { desc = "Vertical terminal" })
+      
+      -- Плавающий терминал
+      vim.keymap.set("n", "<leader>tf", ":ToggleTerm direction=float<CR>", { desc = "Float terminal" })
+      
+      -- Несколько плавающих терминалов
+      vim.keymap.set("n", "<leader>t1", ":1ToggleTerm direction=float<CR>", { desc = "Float terminal 1" })
+      vim.keymap.set("n", "<leader>t2", ":2ToggleTerm direction=float<CR>", { desc = "Float terminal 2" })
+      vim.keymap.set("n", "<leader>t3", ":3ToggleTerm direction=float<CR>", { desc = "Float terminal 3" })
+      
+      -- Lazygit (если установлен)
+      local lazygit = Terminal:new({
+        cmd = "lazygit",
+        dir = "git_dir",
+        direction = "float",
+        float_opts = {
+          border = "double",
+        },
+        on_open = function(term)
+          vim.cmd("startinsert!")
+          vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
+        end,
+        on_close = function(term)
+          vim.cmd("startinsert!")
+        end,
+      })
+      
+      vim.keymap.set("n", "<leader>tg", function() lazygit:toggle() end, { desc = "Lazygit" })
+      
+      -- Настройка клавиш в терминале
+      function _G.set_terminal_keymaps()
+        local opts = {buffer = 0}
+        vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+        vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+        vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+        vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+        vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+        vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+      end
+      
+      vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+    end,
+  },
+  -- Outline символов (навигация по функциям/классам)
+  {
+    "simrat39/symbols-outline.nvim",
+    config = function()
+      require("symbols-outline").setup({
+        highlight_hovered_item = true,
+        show_guides = true,
+        auto_preview = false,
+        position = 'right',
+        relative_width = true,
+        width = 25,
+        auto_close = false,
+        show_numbers = false,
+        show_relative_numbers = false,
+        show_symbol_details = true,
+        preview_bg_highlight = 'Pmenu',
+        autofold_depth = nil,
+        auto_unfold_hover = true,
+        fold_markers = { '', '' },
+        wrap = false,
+        keymaps = {
+          close = {"<Esc>", "q"},
+          goto_location = "<Cr>",
+          focus_location = "o",
+          hover_symbol = "<C-space>",
+          toggle_preview = "K",
+          rename_symbol = "r",
+          code_actions = "a",
+          fold = "h",
+          unfold = "l",
+          fold_all = "W",
+          unfold_all = "E",
+          fold_reset = "R",
+        },
+        lsp_blacklist = {},
+        symbol_blacklist = {},
+        symbols = {
+          File = { icon = "", hl = "@text.uri" },
+          Module = { icon = "", hl = "@namespace" },
+          Namespace = { icon = "", hl = "@namespace" },
+          Package = { icon = "", hl = "@namespace" },
+          Class = { icon = "𝓒", hl = "@type" },
+          Method = { icon = "ƒ", hl = "@method" },
+          Property = { icon = "", hl = "@method" },
+          Field = { icon = "", hl = "@field" },
+          Constructor = { icon = "", hl = "@constructor" },
+          Enum = { icon = "ℰ", hl = "@type" },
+          Interface = { icon = "ﰮ", hl = "@type" },
+          Function = { icon = "", hl = "@function" },
+          Variable = { icon = "", hl = "@constant" },
+          Constant = { icon = "", hl = "@constant" },
+          String = { icon = "𝓐", hl = "@string" },
+          Number = { icon = "#", hl = "@number" },
+          Boolean = { icon = "⊨", hl = "@boolean" },
+          Array = { icon = "", hl = "@constant" },
+          Object = { icon = "⦿", hl = "@type" },
+          Key = { icon = "🔐", hl = "@type" },
+          Null = { icon = "NULL", hl = "@type" },
+          EnumMember = { icon = "", hl = "@field" },
+          Struct = { icon = "𝓢", hl = "@type" },
+          Event = { icon = "🗲", hl = "@type" },
+          Operator = { icon = "+", hl = "@operator" },
+          TypeParameter = { icon = "𝙏", hl = "@parameter" },
+          Component = { icon = "", hl = "@function" },
+          Fragment = { icon = "", hl = "@constant" },
+        },
+      })
+      
+      -- Горячие клавиши
+      vim.keymap.set("n", "<leader>o", ":SymbolsOutline<CR>", { desc = "Toggle symbols outline" })
+      vim.keymap.set("n", "<leader>so", ":SymbolsOutlineOpen<CR>", { desc = "Open symbols outline" })
+      vim.keymap.set("n", "<leader>sc", ":SymbolsOutlineClose<CR>", { desc = "Close symbols outline" })
+    end,
+  },
 }
