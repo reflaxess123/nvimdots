@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(sed:*)",
+      "Bash(git checkout:*)",
+      "Bash(grep:*)",
+      "Bash(vim:*)"
     ],
     "deny": []
   }
