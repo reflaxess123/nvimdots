@@ -109,3 +109,28 @@ end, { desc = "Copy diagnostic info to clipboard" })
 -- Быстрый выход на двойной Esc
 vim.keymap.set("n", "<Esc><Esc>", ":qa!<CR>", { desc = "Quick force exit Neovim" })
 
+-- Исправление проблемы с пустыми буферами
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    -- Если это не первый буфер и есть пустой безымянный буфер
+    local current_buf = vim.api.nvim_get_current_buf()
+    local buf_name = vim.api.nvim_buf_get_name(current_buf)
+    
+    if buf_name ~= "" then
+      -- Найти и удалить пустые безымянные буферы
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if buf ~= current_buf and
+           vim.api.nvim_buf_is_loaded(buf) and 
+           vim.api.nvim_buf_get_name(buf) == "" and
+           not vim.api.nvim_buf_get_option(buf, "modified") and
+           vim.api.nvim_buf_line_count(buf) <= 1 then
+          local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+          if #lines <= 1 and (lines[1] == nil or lines[1] == "") then
+            vim.api.nvim_buf_delete(buf, { force = true })
+          end
+        end
+      end
+    end
+  end,
+})
+
