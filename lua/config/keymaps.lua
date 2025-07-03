@@ -42,11 +42,11 @@ local function smart_jump(key)
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(keys, true, false, true), 'n', true)
 end
 
--- 3. бинды для всех 4 стрелок
-vim.keymap.set("n", "<Down>", function() smart_jump("j") end)
-vim.keymap.set("n", "<Up>", function() smart_jump("k") end)
-vim.keymap.set("n", "<Left>", function() smart_jump("h") end)
-vim.keymap.set("n", "<Right>", function() smart_jump("l") end)
+-- 3. бинды для всех 4 стрелок с поддержкой count
+vim.keymap.set("n", "<Down>", "j")
+vim.keymap.set("n", "<Up>", "k")
+vim.keymap.set("n", "<Left>", "h")
+vim.keymap.set("n", "<Right>", "l")
 
 -- Keymaps for splits
 vim.keymap.set("n", "<leader>sv", ":split<CR>", { desc = "Split window horizontally" })
