@@ -109,6 +109,7 @@ return {
             ["<2-LeftMouse>"] = "open",
             ["<cr>"] = "open",
             ["<esc>"] = "cancel",
+            ["<esc><esc>"] = function() vim.cmd("qa!") end,
             ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
             ["l"] = "focus_preview",
             ["S"] = "open_split",

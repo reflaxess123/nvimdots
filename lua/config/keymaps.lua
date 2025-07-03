@@ -108,3 +108,4 @@ end, { desc = "Copy diagnostic info to clipboard" })
 
 -- Быстрый выход на двойной Esc
 vim.keymap.set("n", "<Esc><Esc>", ":qa!<CR>", { desc = "Quick force exit Neovim" })
+
